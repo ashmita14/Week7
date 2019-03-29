@@ -267,9 +267,9 @@ int main(){
 	b1.display();
 	b1.deleteNode(8);
 	b1.display();
-	//b1.deleteNode(6);
-	//b1.display();
-	//b1.deleteNode();
-	//b1.display();
+	b1.deleteNode(6);
+	b1.display();
+	b1.deleteNode();
+	b1.display();
 	return 0;
 }		
