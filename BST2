@@ -1,0 +1,275 @@
+//Including libraries
+#include<iostream>
+using namespace std;
+
+//declaring class Node
+class Node{
+	public:
+	//declaring the data and two pointers of each node
+	int data;
+	Node* left;
+	Node* right;
+	Node* parent;
+	//default constructor to initialize NULL value to the pointers and 0 to the data
+	Node(){
+		data=0;
+		left=NULL;
+		right=NULL;
+		parent=NULL;
+	}
+};
+
+//Declaring class BST (Binary Search Tree)
+class BST{
+	public:
+	//delcaring root pointer to point to the first element of the tree, which has no parents
+	Node* root;
+	//default constructor to initialize root by NULL
+	BST(){
+	root=NULL;
+	}
+	public:
+
+	
+	void insert(int value){
+		insertHelper(root, value);
+	}
+	
+	void insertHelper(Node* current, int value){
+		if(root==NULL){
+			current=new Node;
+			current->data=value;
+			if(root==NULL) root=current;
+			return;
+		}
+		else{
+			if(current->data>value){
+				//if left is NULL insert it.
+				if(current->left==NULL) {	
+					current->left=new Node;
+					current->left->data=value;
+					current->left->parent=current;
+				}
+				//else move left
+				else insertHelper(current->left, value);
+			}
+			if(current->data<value){
+				//if right is NULL, insert it
+				if(current->right==NULL){
+					current->right=new Node;
+					current->right->data=value;
+					current->right->parent=current;
+				}
+				//else move right
+				else insertHelper(current->right, value);
+			}
+		}
+	}
+
+	//writing function to search for a particular value in the tree using a function search1
+	Node* search(int value1){
+		//passing starting address and value to search to function search1
+		return search1(value1, root);
+	}
+	//function which will actually search the data in the tree using recursion
+	Node* search1(int value2, Node* current1){
+		//search continues in some direction untio the fuction hits NULL, so if not NULL, then move appropriately in either direction or return the value if it matches with the search value 
+		if(current1!=NULL){
+			//if value to search is lesser than the value of the current node, then moving function to the left of the node, recursively
+			if(current1->data>value2) { cout<<"Moving left."<<endl; search1(value2,current1->left); }
+			//if value to search is greater than the value of the current node, then moving function to the right of the node, recursively
+			if(current1->data<value2) { cout<<"Moving right."<<endl; search1(value2,current1->right);  }
+			//if value to search matches the value of the current node, then returning the address of the current node
+			if(current1->data==value2) {cout<<"Value found."<<current1->data<<endl; return current1; }
+		}
+	}			
+
+	//writing a function to find minimum node of any subtree
+	Node* find_min(Node* current){
+		//checking if it is the last node in the left hand side of the tree
+		while(current->left!=NULL) current=current->left;
+		//returning the last node left on the left side which is the minimum node
+		if(current->left==NULL) return current;
+	}
+
+	//writing a function to find minimum node of any subtree
+	Node* find_max(Node* current){
+		//checking if it is the last node in the right hand side of the tree
+		while(current->right!=NULL) current=current->right;
+		//returning the last node left on the right side which is the maximum node
+		if(current->right==NULL) return current;
+	}
+	
+	//writing function to replace a node with its parent
+	void replace_At_Parent(Node* A, Node* B){
+		//defining current(node to replace) and temp(node which will replace current) and pcurrent(parent of current)
+		Node* current=A;
+		Node* temp=B;
+		Node* pcurrent=current->parent;
+		//checking if node to be deleted is root
+		if(pcurrent!=NULL){
+			cout<<"Parent not null"<<endl;
+			//checking of current is the left or right child of its parent
+			if(pcurrent->data>=current->data){
+				cout<<"Left child."<<endl;
+				//current is the left child of its parent,thus making temp the left child of current's parent, replacing current
+				pcurrent->left=temp; 
+				if(temp!=NULL) temp->parent=pcurrent; //making temp's parent as current's parent only if it is not NULL
+				//deleting current
+				delete current;
+			}
+			if(pcurrent->data<current->data){
+				cout<<"Right child."<<endl;
+				//current is the right child of its parent, thus making temo the right child of current's parent, replacing current
+				pcurrent->right=temp;
+				if(temp!=NULL) temp->parent=pcurrent; //making temp's parent as current's parent only if it is not NULL
+				//deleting current
+				delete current;
+			}
+		}
+		//if node to be deleted is root
+		if(pcurrent==NULL){
+			//we need to replace root with the minimum along the right side of tree (or maximum along the left side of the tree) to maintain the rules, so temp is the min and has no left child
+			//if temp has no children
+			if(temp->right==NULL){
+				//joining temp with left and right child of root to be deleted
+				temp->left=root->left;
+				temp->right=root->right;
+				//changing parents of children of original root
+				root->left->parent=temp;
+				root->right->parent=temp;
+				//making parent of temp as NULL
+				temp->parent=NULL;
+				root=temp; //making temp the root
+			}
+			//if temp has right child
+			if(temp->right!=NULL){
+				//joining temp with left child of root to be deleted
+				temp->left=root->left;
+				//making the right child of temp the left child of its parent
+				temp->parent->left=temp->right;
+				//joining temp with right child of root to be deleted
+				temp->right=root->right;
+				//changing parents of children of original root
+				root->left->parent=temp;
+				root->right->parent=temp;
+				//making parent of temp as NULL
+				temp->parent=NULL;
+				root=temp; //making temp the root
+			}
+		}
+	}
+
+	//writing question to delete a node
+	void deleteNode(int value){
+		//declaring variable
+		int val=value;
+		//declaring pointer to store the address of Node having that value
+		Node* current;
+		//declaring new pointer stating from root to find required node
+		Node* current1=root;
+		//running loop till current1 hits NULL
+		while(current1!=NULL){
+			if(current1->data>value) current1=current1->left;
+			if(current1->data<value) current1=current1->right;
+			if(current1->data==value){
+				cout<<"value found"<<endl;
+				current=current1;
+				break;
+			}
+		}
+		cout<<current<<endl;
+		//if the node to be deleted is not the root
+		if(current!=NULL && current->parent!=NULL){
+			//if the node to be deleted has no children
+			cout<<"Not root."<<endl;
+			if(current->left==NULL && current->right==NULL){
+				cout<<"no child."<<endl;
+				//cout<<current->data<<" "<<current->left<<endl;
+				//calling replace funcion to replace the node to be deleted by NULL
+				replace_At_Parent(current, current->left);
+			}
+			//if the node to be deleted has only left child
+			if(current->left!=NULL && current->right==NULL){
+				//calling replace function and passing address of current node and its left child
+				replace_At_Parent(current, current->left);
+			}
+			//if the node to be deleted has only right child
+			if(current->left==NULL && current->right!=NULL){
+				//calling replace function and passing address of current node and its left child
+				replace_At_Parent(current, current->right);
+			}
+			//if node to be deleted has two children
+			if(current->left!=NULL && current->right!=NULL){
+				//finding minimum of right tree to replace the node with
+				Node* temp1=find_min(current->right);
+				//breaking connections of minimum node with its original parent and child, making its parent the parent of its child
+				temp1->parent->left=temp1->right;
+				temp1->parent=NULL;
+				temp1->left=current->left;
+				temp1->right=current->right;
+				//replacing the value of temp1 with current
+				replace_At_Parent(current, temp1);	
+			}
+		}
+		//if the node to be deleted is root
+		else if(current==NULL && current->parent==NULL){
+			if(current->left==NULL && current->right==NULL){
+				replace_At_Parent(current, current->left);
+			}
+			if(current->left!=NULL && current->right==NULL){
+				Node* temp2 = find_max(current->left);
+				replace_At_Parent(current, temp2);
+			}
+			if(current->left==NULL && current->right!=NULL){
+				Node* temp2 = find_min(current->right);
+				replace_At_Parent(current, temp2);
+			}
+			if(current->left!=NULL && current->right!=NULL){
+				Node* temp2 = find_min(current->right);
+				replace_At_Parent(current, temp2);
+			}
+		}
+		else cout<<"No such node found."<<endl;
+	}
+	
+	//function to display binary search tree using another function display2
+	void display(){
+		//passing starting address to display2
+		display2(root);
+	}
+	//funtion which actually displays the binary search tree elements in increasing order (or decreasing, as per code) by using recursion
+	void display2(Node* current){
+		//Base concdition
+		//if current is NULL, then the function returns as there is nothing left to print
+		if(current==NULL) return;
+		//recursively calling function and moving it to the left of the tree, the function finishes the left half of each tree first
+		display2(current->left);
+		//displaying the data of current node, gets executed as the function returns, so left side first then right
+		cout<<current->data<<",";
+		//recursively calling function and moving it towards right of the tree
+		display2(current->right);
+	}
+};
+
+int main(){
+	//making object of class BST
+	BST b1;
+	//inserting values
+	b1.insert(5);
+	b1.insert(2);
+	b1.insert(3);
+	b1.insert(4);
+	b1.insert(1);
+	b1.insert(6);
+	b1.insert(7);
+	b1.insert(8);
+	b1.display();
+	b1.deleteNode(8);
+	b1.display();
+	//b1.deleteNode(6);
+	//b1.display();
+	//b1.deleteNode();
+	//b1.display();
+	return 0;
+}		
